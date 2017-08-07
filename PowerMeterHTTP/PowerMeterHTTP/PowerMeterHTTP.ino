@@ -134,7 +134,9 @@ void publishData(int *power, int *ppulse)
 {
   // if there's a successful connection:
   if (client.connect(server, 80)) {
+#ifdef DEBUG
     Serial.println("Connecting...");
+#endif
     
     // send the HTTP GET request:
     client.print("GET /api/post?apikey=");
