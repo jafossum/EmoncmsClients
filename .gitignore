@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+# JAF Aditions
+Secrets.h
