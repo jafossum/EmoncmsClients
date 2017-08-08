@@ -5,8 +5,6 @@
   #include "WProgram.h"
 #endif
 
-#define INTERUPT_PIN 2
-
 void setup() {
   
   Serial.begin(115200);  // initialize Serial interface
@@ -16,19 +14,18 @@ void setup() {
   }
   
   Serial.println("Starting...");
+  Serial.println(D4);
 
-  attachInterrupt(digitalPinToInterrupt(INTERUPT_PIN), onPulse2, FALLING);
+  attachInterrupt(digitalPinToInterrupt(D4), onPulse2, FALLING);
 }
 
 void loop() {
-  Serial.println(".");
-  delay(200);
-
+  delay(500);
 }
 
 void onPulse2()
 {
-  if (digitalRead(INTERUPT_PIN)) {
+  if (digitalRead(D4)) {
     Serial.println("Interupt 2 triggered...");
   }
 }
