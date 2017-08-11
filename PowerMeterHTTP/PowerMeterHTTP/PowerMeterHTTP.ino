@@ -17,14 +17,14 @@
 #include <ESP8266WiFi.h>
 #include "Secrets.h"
 
-#define REPORTING_INTERVAL_MS  2500
+#define REPORTING_INTERVAL_MS  5000
 
 // Comment this out for not printing data to the serialport
 #define DEBUG
 
 // Wifi data
-const char* ssid = "Fossum";
-const char* password = WIFI_PASSWORD; // PASSWORD from Secrets.h
+const char* ssid = WIFI_SSID;  // SSID from Secrets.h
+const char* password = WIFI_PASSWORD;  // PASSWORD from Secrets.h
 
 // HTTP Client
 WiFiClient client;
@@ -43,15 +43,17 @@ Timer callback_timer;
 // ----------- Pinout assignments  -----------
 //
 // digital input pins:
-// dig pin 1 for input signal
-
-const byte INT_PIN = 1;
+// dig pin D4 for input signal 
 
 // Pulse counting settings 
 long pulseCount = 0;               // Number of pulses, used to measure energy.
 unsigned long pulseTime,lastTime;  // Used to measure power.
 double power, elapsedWh;           // power and energy
 int ppwh = 1;                      // pulses per watt hour
+
+//----- Interupt filtering variables ---------
+volatile unsigned long minElapsed = 50;
+volatile unsigned long elapsedTime, previousTime;
 
 void setup()
 {  
@@ -91,10 +93,8 @@ void setup()
   // Setup for report event timing
   int reportEvent = callback_timer.every(REPORTING_INTERVAL_MS, send_data);
 
-  // Attach interupt for cpunting light pulses on powercentral
-  
-  attachInterrupt(digitalPinToInterrupt(INT_PIN), onPulse, FALLING);
-  // attachInterrupt(INT_PIN, onPulse, FALLING);
+  // Attach interupt for capturing light pulses on powercentral
+  attachInterrupt(digitalPinToInterrupt(D4), onPulse, FALLING);
 
   // enable the watchdog timer - 6s timeout
   ESP.wdtEnable(6000);
@@ -180,14 +180,21 @@ void publishData(int *power, int *ppulse)
 // The interrupt routine - runs each time a falling edge of a pulse is detected
 void onPulse()                  
 {
-  lastTime = pulseTime;        //used to measure time between pulses.
-  pulseTime = micros();
-  pulseCount++;                                                      //pulseCounter               
-  emontx.power = int((3600000000.0 / (pulseTime - lastTime))/ppwh);  //Calculate power
+  elapsedTime = millis() - previousTime;
+
+  if (elapsedTime >= minElapsed)  //in range
+  {
+    previousTime = millis();
+    
+    lastTime = pulseTime;        //used to measure time between pulses.
+    pulseTime = micros();
+    pulseCount++;                                                      //pulseCounter               
+    emontx.power = int((3600000000.0 / (pulseTime - lastTime))/ppwh);  //Calculate power
 
 #ifdef DEBUG
-  Serial.print("Power: ");
-  Serial.print(emontx.power);
-  Serial.println(" W");
+    Serial.print("Power: ");
+    Serial.print(emontx.power);
+    Serial.println(" W");
 #endif
+  }
 }

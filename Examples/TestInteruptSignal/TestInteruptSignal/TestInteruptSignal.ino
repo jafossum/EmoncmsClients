@@ -5,6 +5,10 @@
   #include "WProgram.h"
 #endif
 
+//----- ISR variables ---------
+volatile unsigned long minElapsed = 50;
+volatile unsigned long elapsedTime, previousTime;
+
 void setup() {
   
   Serial.begin(115200);  // initialize Serial interface
@@ -25,7 +29,18 @@ void loop() {
 
 void onPulse2()
 {
-  if (digitalRead(D4)) {
-    Serial.println("Interupt 2 triggered...");
+  elapsedTime = millis() - previousTime;
+  Serial.println(elapsedTime);
+  
+  if (elapsedTime < minElapsed)  //false interrupt
+  {
+    return;
+  }
+  if (elapsedTime >= minElapsed)  //in range
+  {
+    previousTime = millis();
+    {
+      Serial.println("Interupt 2 triggered...");
+    }
   }
 }
