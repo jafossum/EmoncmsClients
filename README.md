@@ -14,11 +14,13 @@ The [TSL250R-LF](https://www.digikey.com/product-detail/en/ams/TSL250R-LF/TSL250
 ![TSL250R-LF](Resources/TSL250.jpeg "TSL250R-LF")
 
 ## Connections and Interrupt handling
-The TSL250R-LF is connected to the *3.3V*, *GND* and *D4* terminals of the NodeMCU. The *D4* connector is then setup for interrupt handling in the the Arduino code:
+The TSL250R-LF is connected to the *3.3V*, *GND* and *D1* terminals of the NodeMCU. The *D1* connector is then setup for interrupt handling in the the Arduino code:
 ```cpp
   // Attach interupt for capturing light pulses on powercentral
-  attachInterrupt(digitalPinToInterrupt(D4), onPulse, FALLING);
+  attachInterrupt(digitalPinToInterrupt(D1), onPulse, FALLING);
 ```
+
+Note that GPIO0, GPIO2, GPIO6-11 and GPIO15 has dual meaning on the ESP module, and might affect startup, or operating mode of the module. Using D1 - GPIO5 in this project to avoid the problem all toghether. Started using D4 (GPIO2), but this affected bootup, and flashing, so if there was a powerfailure or reset the device would not boot. For more info search the web.
 
 ### Interrupt filtering
 For avoiding ripple in the interrupt triggering, and getting false readings there is made a small time validation in the *onPulse()* method

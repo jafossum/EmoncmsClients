@@ -43,7 +43,7 @@ Timer callback_timer;
 // ----------- Pinout assignments  -----------
 //
 // digital input pins:
-// dig pin D4 for input signal 
+// dig pin D1 for input signal 
 
 // Pulse counting settings 
 long pulseCount = 0;               // Number of pulses, used to measure energy.
@@ -94,7 +94,7 @@ void setup()
   int reportEvent = callback_timer.every(REPORTING_INTERVAL_MS, send_data);
 
   // Attach interupt for capturing light pulses on powercentral
-  attachInterrupt(digitalPinToInterrupt(D4), onPulse, FALLING);
+  attachInterrupt(digitalPinToInterrupt(D1), onPulse, FALLING);
 
   // enable the watchdog timer - 6s timeout
   ESP.wdtEnable(6000);
