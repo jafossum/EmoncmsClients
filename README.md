@@ -13,7 +13,7 @@ The [TSL250R-LF](https://www.digikey.com/product-detail/en/ams/TSL250R-LF/TSL250
 
 ![TSL250R-LF](Resources/TSL250.jpeg "TSL250R-LF")
 
-## Putting it all together
+## Connections and Interrupt handling
 The TSL250R-LF is connected to the *3.3V*, *GND* and *D4* terminals of the NodeMCU. The *D4* connector is then setup for interrupt handling in the the Arduino code:
 ```cpp
   // Attach interupt for capturing light pulses on powercentral
@@ -40,6 +40,11 @@ The HTTP client made uses the EmonCMS HTTP API directly, and is the most complet
 
 ### MQTT Client
 The MQTT Client is based on  having a running MQTT server in your home automation system that can communicate with your emoncms.org account. This is copied from other examples on the web, and has not been completed, but is referenced here for example.
+
+### EmonCMS.org
+Example for monitoing data representation on emoncms.org
+
+![EmonCMS.org](Resources/emoncms_example.png "EmonCMS Example")
 
 ## Secrets.h
 In the *.gitignore* file there is put a file called *Secrets.h*. This is a .h file ment to keep passwords and other connection details like the emoncms *API_WRITE_KEY*. This will not be added to the git repository, but must be present alongside the *.ino* files to make the sketch compile. Here is an example on what this file can look like:
