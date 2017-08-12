@@ -16,8 +16,8 @@ The [TSL250R-LF](https://www.digikey.com/product-detail/en/ams/TSL250R-LF/TSL250
 ## Putting it all together
 The TSL250R-LF is connected to the *3.3V*, *GND* and *D4* terminals of the NodeMCU. The *D4* connector is then setup for interrupt handling in the the Arduino code:
 ```cpp
-// Attach interupt for capturing light pulses on powercentral
-attachInterrupt(digitalPinToInterrupt(D4), onPulse, FALLING);
+  // Attach interupt for capturing light pulses on powercentral
+  attachInterrupt(digitalPinToInterrupt(D4), onPulse, FALLING);
 ```
 
 ### Interrupt filtering
@@ -26,12 +26,12 @@ For avoiding ripple in the interrupt triggering, and getting false readings ther
 // The interrupt routine - runs each time a falling edge of a pulse is detected
 void onPulse()                  
 {
-elapsedTime = millis() - previousTime;
+  elapsedTime = millis() - previousTime;
 
-if (elapsedTime >= minElapsed)  //in range
-{
-previousTime = millis();
-// Put time calculations between interrupts here
+  if (elapsedTime >= minElapsed)  //in range
+  {
+    previousTime = millis();
+    // Put time calculations between interrupts here
 ```
 
 ## EmonCMS Clients
