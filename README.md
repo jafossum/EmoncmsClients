@@ -1,7 +1,5 @@
 # Emoncms Clients for Home Energy Monitoring
 
-# Home Energy Monitoring
-
 ## EmonCMS
 [EmonCMS](https://emoncms.org/) is a powerful open-source web-app for processing, logging and visualising energy, temperature and other environmental data. This can be used to monitor the current consumption for your home using simple components.
 
