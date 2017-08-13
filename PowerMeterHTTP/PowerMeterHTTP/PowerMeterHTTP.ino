@@ -34,9 +34,6 @@ char server[] = "emoncms.org";     // name address for emoncms.org
 String apikey = API_KEY;  // API_KEY from Secrets.h
 int node = 0; //if 0, not used
 
-typedef struct { int power, pulse;} PayloadTX;
-PayloadTX emontx; 
-
 // Timer used for timing callbacks
 Timer callback_timer;                             
 
@@ -46,13 +43,17 @@ Timer callback_timer;
 // dig pin D1 for input signal 
 
 // Pulse counting settings 
-long pulseCount = 0;               // Number of pulses, used to measure energy.
+int pulseCount = 0;                // Number of pulses, used to measure energy.
+int power[50] = { };               // Array to store pulse power values
+int txpower = 0;                   // powernumber to send
+int txpulse = 0;                   // number of pulses to send
 unsigned long pulseTime,lastTime;  // Used to measure power.
-double power, elapsedWh;           // power and energy
 int ppwh = 1;                      // pulses per watt hour
+int _sum = 0;                      // Helper for calculating average
+int _pulsecount = 0;               // Helper for calcualting average
 
 //----- Interupt filtering variables ---------
-volatile unsigned long minElapsed = 50;
+volatile unsigned long minElapsed = 100;
 volatile unsigned long elapsedTime, previousTime;
 
 void setup()
@@ -118,15 +119,27 @@ void send_data()
 #endif
   }
 
-  emontx.pulse = pulseCount; pulseCount=0;
+  // Calculate average over the last power meassurements before sending
+  _sum = 0;
+  _pulsecount = pulseCount;
+  
+  for(int i=1; i<=_pulsecount; i++) {
+    _sum += power[i];
+  }
 
-  publishData(&emontx.power, &emontx.pulse);
+  txpower = int(_sum / _pulsecount);
+  txpulse = _pulsecount;
+   
+  pulseCount=0;
+  power[50] = { };
+
+  publishData(&txpower, &txpulse);
 
 #ifdef DEBUG
   Serial.print("W: ");
-  Serial.println(emontx.power);
-  Serial.print("Pulse: ");
-  Serial.println(emontx.pulse);
+  Serial.print(txpower);
+  Serial.print(" - Pulse: ");
+  Serial.println(txpulse);
 #endif
 }
 
@@ -188,13 +201,23 @@ void onPulse()
     
     lastTime = pulseTime;        //used to measure time between pulses.
     pulseTime = micros();
-    pulseCount++;                                                      //pulseCounter               
-    emontx.power = int((3600000000.0 / (pulseTime - lastTime))/ppwh);  //Calculate power
 
+    // Increase pulseCounter
+    pulseCount++;
+    
+    // Size of array to avoid runtime error
+    if (pulseCount < 50) {
+      power[pulseCount] = int((3600000000.0 / (pulseTime - lastTime))/ppwh);  //Calculate power
+      
 #ifdef DEBUG
-    Serial.print("Power: ");
-    Serial.print(emontx.power);
-    Serial.println(" W");
+      Serial.print("Power: ");
+      Serial.print(power[pulseCount]);
+      Serial.print(" W - Count: ");
+      Serial.println(pulseCount);
 #endif
+    }
+    else {
+      Serial.println("Pulsecount over 50. Not logging....");
+    }
   }
 }
