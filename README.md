@@ -4,7 +4,7 @@
 [EmonCMS](https://emoncms.org/) is a powerful open-source web-app for processing, logging and visualising energy, temperature and other environmental data. This can be used to monitor the current consumption for your home using simple components.
 
 ## NodeMCU
-[NoeMCU](http://nodemcu.com/index_en.html) is an open source IoT platform. It includes firmware which runs on the ESP8266 Wi-Fi SoC from Espressif Systems, and hardware which is based on the ESP-12 module. The term "NodeMCU" by default refers to the firmware rather than the dev kits. The NodeMCU is ment to be used with the [eLua](http://www.eluaproject.net/) project, but can also be programmed with the [Arduino IDE Environment](https://www.arduino.cc/) with a few adjustments (Search the web for this).
+[NoeMCU](http://nodemcu.com/index_en.html) is an open source IoT platform. It includes firmware which runs on the ESP8266 Wi-Fi SoC from Espressif Systems, and hardware which is based on the ESP-12 module. The term "NodeMCU" by default refers to the firmware rather than the dev kits. The NodeMCU is ment to be used with the [eLua](http://www.eluaproject.net/) project, but can also be programmed with the [Arduino IDE Environment](https://www.arduino.cc/) with a few adjustments. See the Sparkfun [ESP8266 Thing Hookup Guide](https://learn.sparkfun.com/tutorials/esp8266-thing-hookup-guide/installing-the-esp8266-arduino-addon) for details.
 
 ![NodeMcu](Resources/nodemcu_pinout.png "NodeMCU")
 
