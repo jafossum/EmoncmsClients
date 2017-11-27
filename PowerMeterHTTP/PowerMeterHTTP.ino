@@ -45,11 +45,11 @@ Timer callback_timer;
 // Pulse counting settings 
 int pulseCount = 0;                // Number of pulses, used to measure energy.
 int power[50] = { };               // Array to store pulse power values
-int txpower = 0;                   // powernumber to send
+long txpower = 0;                  // powernumber to send
 int txpulse = 0;                   // number of pulses to send
 unsigned long pulseTime,lastTime;  // Used to measure power.
 int ppwh = 1;                      // pulses per watt hour
-int _sum = 0;                      // Helper for calculating average
+long _sum = 0;                     // Helper for calculating average
 int _pulsecount = 0;               // Helper for calcualting average
 
 //----- Interupt filtering variables ---------
@@ -143,7 +143,7 @@ void send_data()
 #endif
 }
 
-void publishData(int *power, int *ppulse)
+void publishData(long *power, int *ppulse)
 {
   // if there's a successful connection:
   if (client.connect(server, 80)) {
