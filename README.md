@@ -36,12 +36,9 @@ void onPulse()
     // Put time calculations between interrupts here
 ```
 
-## EmonCMS Clients
+## EmonCMS Client
 ### HTTP Client
-The HTTP client made uses the EmonCMS HTTP API directly, and is the most complete client in this repository. This uses HTTP GET Requests directly against emoncms.org, with the private *API_WRITE_KEY* from your EmonCMS account to update the values.
-
-### MQTT Client
-The MQTT Client is based on  having a running MQTT server in your home automation system that can communicate with your emoncms.org account. This is copied from other examples on the web, and has not been completed, but is referenced here for example.
+The HTTP client made uses the EmonCMS HTTP API, with the private *API_WRITE_KEY* from your EmonCMS account to update the values.
 
 ### EmonCMS.org
 Example for monitoing data representation on emoncms.org
