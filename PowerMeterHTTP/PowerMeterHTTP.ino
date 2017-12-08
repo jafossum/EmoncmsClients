@@ -14,24 +14,29 @@
   #include "WProgram.h"
 #endif
 #include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
 #include "Secrets.h"
 
 #define REPORTING_INTERVAL_MS 5000
 
-// Comment this out for not printing data to the serialport
-#define DEBUG
+// Comment this out for not printing data to the serialport after Setup()
+// #define DEBUG
 
 // Wifi data
 const char* ssid = WIFI_SSID;  // SSID from Secrets.h
 const char* password = WIFI_PASSWORD;  // PASSWORD from Secrets.h
 
-// HTTP Client
-WiFiClient client;
+// HTTPS Client
+WiFiClientSecure client;
 
 //Emoncms configurations
-char server[] = "emoncms.org";     // name address for emoncms.org
-String apikey = API_KEY;  // API_KEY from Secrets.h
-int node = 0; //if 0, not used                          
+const char* server = "emoncms.org";     // name address for emoncms.org
+const int httpsPort = 443;
+String apikey = API_KEY;              // API_KEY from Secrets.h
+int node = 0;                         //if 0, not used
+
+// SHA1 fingerprint of the certificate
+const char* fingerprint = "B4 58 91 74 C9 33 52 18 1A A5 A1 81 32 60 9D CB 6E 69 53 C2";
 
 // ----------- Pinout assignments  -----------
 //
@@ -63,41 +68,50 @@ void setup()
     delay(200); // wait for serial port to connect. Needed for native USB
   }
 
-#ifdef DEBUG
   Serial.println("-------------------------------------");
   Serial.println("Sketch ID:      PowerMeterHTTP.ino");
   Serial.println ("Getting IP address...");
   Serial.print("Your are connecting to: ");
   Serial.println(ssid);
-#endif
 
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-#ifdef DEBUG
     Serial.print(".");
-#endif
   }
 
-#ifdef DEBUG
   Serial.println("");
   Serial.println("Your ESP is connected!");  
   Serial.print("Your IP address is: ");
   Serial.println(WiFi.localIP());
-#endif
+
+  // Use WiFiClientSecure class to create TLS connection
+  Serial.print("connecting to ");
+  Serial.println(server);
+  if (!client.connect(server, httpsPort)) {
+    Serial.println("connection failed");
+    return;
+  }
+
+  // Optinal - Check SHA-1 fingerprint (Changes every 2-3 months)
+  if (client.verify(fingerprint, server)) {
+    Serial.println("certificate matches");
+  } else {
+    Serial.println("certificate doesn't match");
+  }
 
   // Attach interupt for capturing light pulses on powercentral
   attachInterrupt(digitalPinToInterrupt(D1), onPulse, FALLING);
 
-  // enable the watchdog timer - 6s timeout
-  ESP.wdtEnable(6000);
+  // enable the watchdog timer - 8s timeout
+  ESP.wdtEnable(8000);
 }
 
 void loop()             
 {
-  send_data;
   delay(REPORTING_INTERVAL_MS);
+  send_data();
 }
 
 void send_data()
@@ -140,7 +154,7 @@ void send_data()
 void publishData(long *power, int *ppulse)
 {
   // if there's a successful connection:
-  if (client.connect(server, 80)) {
+  if (client.connect(server, httpsPort)) {
 #ifdef DEBUG
     Serial.println("Connecting...");
 #endif
