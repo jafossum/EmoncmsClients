@@ -13,11 +13,10 @@
 #else
   #include "WProgram.h"
 #endif
-#include <Timer.h>
 #include <ESP8266WiFi.h>
 #include "Secrets.h"
 
-#define REPORTING_INTERVAL_MS  5000
+#define REPORTING_INTERVAL_MS 5000
 
 // Comment this out for not printing data to the serialport
 #define DEBUG
@@ -32,10 +31,7 @@ WiFiClient client;
 //Emoncms configurations
 char server[] = "emoncms.org";     // name address for emoncms.org
 String apikey = API_KEY;  // API_KEY from Secrets.h
-int node = 0; //if 0, not used
-
-// Timer used for timing callbacks
-Timer callback_timer;                             
+int node = 0; //if 0, not used                          
 
 // ----------- Pinout assignments  -----------
 //
@@ -91,9 +87,6 @@ void setup()
   Serial.println(WiFi.localIP());
 #endif
 
-  // Setup for report event timing
-  int reportEvent = callback_timer.every(REPORTING_INTERVAL_MS, send_data);
-
   // Attach interupt for capturing light pulses on powercentral
   attachInterrupt(digitalPinToInterrupt(D1), onPulse, FALLING);
 
@@ -102,8 +95,9 @@ void setup()
 }
 
 void loop()             
-{ 
-  callback_timer.update();
+{
+  send_data;
+  delay(REPORTING_INTERVAL_MS);
 }
 
 void send_data()
