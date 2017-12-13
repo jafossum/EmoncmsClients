@@ -1,7 +1,6 @@
 #ifndef emoncms_h
 #define emoncms_h
 
-#include "arduino.h"
 #include <WiFiClientSecure.h>
 #include "Secrets.h"
 

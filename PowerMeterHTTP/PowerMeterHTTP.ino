@@ -8,7 +8,7 @@
   to an emoncms server and makes a request
 */
 
-#include "arduino.h"
+#include "Arduino.h"
 #include "emoncms.h"
 #include "wifiwrapper.h"
 #include "Secrets.h"
