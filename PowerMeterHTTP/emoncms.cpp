@@ -29,7 +29,7 @@ void EmonCms::publishData(long *power, int *ppulse)
     
     // send the HTTP GET request:
     EmonCms::secureClient.print("GET /api/post?apikey=");
-    EmonCms::secureClient.print(apikey);
+    EmonCms::secureClient.print(API_KEY);
     
     if (node > 0) {
         EmonCms::secureClient.print("&node=");
