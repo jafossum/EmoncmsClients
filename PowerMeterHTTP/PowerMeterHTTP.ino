@@ -101,20 +101,22 @@ void send_data()
     _sum += power[i];
   }
 
-  txpower = int(_sum / _pulsecount);
-  txpulse = _pulsecount;
-   
-  pulseCount=0;
-  power[50] = { };
+  if (_pulsecount > 0) {
+    txpower = int(_sum / _pulsecount);
+    txpulse = _pulsecount;
+    
+    pulseCount=0;
+    power[50] = { };
 
-  client.publishData(&txpower, &txpulse);
+    client.publishData(&txpower, &txpulse);
 
 #ifdef DEBUG
-  Serial.print("W: ");
-  Serial.print(txpower);
-  Serial.print(" - Pulse: ");
-  Serial.println(txpulse);
+    Serial.print("W: ");
+    Serial.print(txpower);
+    Serial.print(" - Pulse: ");
+    Serial.println(txpulse);
 #endif
+  }
 }
 
 // The interrupt routine - runs each time a falling edge of a pulse is detected
