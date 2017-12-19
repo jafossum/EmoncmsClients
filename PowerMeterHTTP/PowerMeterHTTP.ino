@@ -114,7 +114,7 @@ void send_data()
     Serial.print("W: ");
     Serial.print(txpower);
     Serial.print(" - Pulse: ");
-    Serial.println(txpulse);
+    Serial.println(_pulsecount);
 #endif
   }
 }
