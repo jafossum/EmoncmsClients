@@ -105,7 +105,7 @@ void send_data()
     pulseCount=0;
     power[50] = { };
 
-    long txpower = _sum / _pulsecount;
+    long txpower = (_sum / _pulsecount);
 
     client.publishData(&txpower, &_pulsecount);
 
