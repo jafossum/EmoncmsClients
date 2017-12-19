@@ -28,11 +28,10 @@ For avoiding ripple in the interrupt triggering, and getting false readings ther
 // The interrupt routine - runs each time a falling edge of a pulse is detected
 void onPulse()                  
 {
-  elapsedTime = millis() - previousTime;
-
-  if (elapsedTime >= minElapsed)  //in range
+  if ((micros() - lastTime) >= MIN_ELAPSED_TIME)  //in range
   {
-    previousTime = millis();
+    lastTime = pulseTime;        //used to measure time between pulses.
+    pulseTime = micros();
     // Put time calculations between interrupts here
 ```
 
