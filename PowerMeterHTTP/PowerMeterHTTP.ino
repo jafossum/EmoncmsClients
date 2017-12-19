@@ -15,7 +15,9 @@
 
 // Comment this out for not printing data to the serialport after Setup()
 #define DEBUG
-#define REPORTING_INTERVAL_MS 10000
+#define REPORTING_INTERVAL_MS 10000     // Reporting interval (ms)
+#define MIN_ELAPSED_TIME 100000         // Filtering min elapsed time (microSec)
+#define PPWH 1                          // pulses per watt hour
 
 // EmonCms Client
 EmonCms client;
@@ -32,11 +34,7 @@ WiFiWrapper wifi;
 volatile int pulseCount = 0;       // Number of pulses, used to measure energy.
 volatile int power[50] = { };      // Array to store pulse power values
 unsigned long pulseTime,lastTime;  // Used to measure power.
-static int ppwh = 1;               // pulses per watt hour
 int loopCount = 0;                 // Count iterations on mainloop
-
-//----- Interupt filtering variables ---------
-static long minElapsed = 100000;
 
 void setup()
 {  
@@ -80,8 +78,8 @@ void loop()
     // check Wifi is still ok - Watchdog timer will catch this if not connected
     while (!wifi.isConnected()) {
       Serial.println("WiFi not connected!");
-      loopCount = loopCount + 10;
-      delay(100);
+      loopCount = loopCount + 50;
+      delay(500);
     }
 
     send_data();
@@ -92,6 +90,7 @@ void loop()
   }
 }
 
+// Periodic calculate and send data method
 void send_data()
 {  
   // Calculate average over the last power meassurements before sending
@@ -122,7 +121,7 @@ void send_data()
 // The interrupt routine - runs each time a falling edge of a pulse is detected
 void onPulse()                  
 {
-  if ((micros() - lastTime) >= minElapsed)  //in range
+  if ((micros() - lastTime) >= MIN_ELAPSED_TIME)  //in range
   {
     lastTime = pulseTime;        //used to measure time between pulses.
     pulseTime = micros();
@@ -132,7 +131,7 @@ void onPulse()
     
     // Size of array to avoid runtime error
     if (pulseCount < 50) {
-      power[pulseCount] = int((3600000000.0 / (pulseTime - lastTime))/ppwh);  //Calculate power
+      power[pulseCount] = int((3600000000.0 / (pulseTime - lastTime)) / PPWH);  //Calculate power
       
 #ifdef DEBUG
       Serial.print("Power: ");
