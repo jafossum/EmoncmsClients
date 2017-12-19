@@ -13,10 +13,9 @@
 #include "wifiwrapper.h"
 #include "Secrets.h"
 
-#define REPORTING_INTERVAL_MS 5000
-
 // Comment this out for not printing data to the serialport after Setup()
 #define DEBUG
+#define REPORTING_INTERVAL_MS 10000
 
 // EmonCms Client
 EmonCms client;
@@ -30,18 +29,14 @@ WiFiWrapper wifi;
 // dig pin D1 for input signal 
 
 // Pulse counting settings 
-int pulseCount = 0;                // Number of pulses, used to measure energy.
-int power[50] = { };               // Array to store pulse power values
-long txpower = 0;                  // powernumber to send
-int txpulse = 0;                   // number of pulses to send
+volatile int pulseCount = 0;       // Number of pulses, used to measure energy.
+volatile int power[50] = { };      // Array to store pulse power values
 unsigned long pulseTime,lastTime;  // Used to measure power.
-int ppwh = 1;                      // pulses per watt hour
-long _sum = 0;                     // Helper for calculating average
-int _pulsecount = 0;               // Helper for calcualting average
+static int ppwh = 1;               // pulses per watt hour
+int loopCount = 0;                 // Count iterations on mainloop
 
 //----- Interupt filtering variables ---------
-volatile unsigned long minElapsed = 100;
-volatile unsigned long elapsedTime, previousTime;
+static long minElapsed = 100000;
 
 void setup()
 {  
@@ -69,46 +64,51 @@ void setup()
   // Attach interupt for capturing light pulses on powercentral
   attachInterrupt(digitalPinToInterrupt(D1), onPulse, FALLING);
 
-  // enable the watchdog timer - 8s timeout
-  ESP.wdtEnable(8000);
+  // enable the watchdog timer - 4s timeout
+  ESP.wdtEnable(WDTO_4S);
 }
 
 void loop()             
 {
-  delay(REPORTING_INTERVAL_MS);
-
   // reset the watchdog timer
   ESP.wdtFeed();
 
-  // check our Wifi is still ok - Watchdog timer will catch this if not connected
-  while (!wifi.isConnected()) {
-      delay(500);
-  #ifdef DEBUG
-      Serial.println("WiFi not connected!");
-  #endif
-  }
+  if (loopCount > (REPORTING_INTERVAL_MS / 10)) 
+  {
+    loopCount = 0;
 
-  send_data();
+    // check Wifi is still ok - Watchdog timer will catch this if not connected
+    while (!wifi.isConnected()) {
+      Serial.println("WiFi not connected!");
+      loopCount = loopCount + 10;
+      delay(100);
+    }
+
+    send_data();
+
+  } else {
+    loopCount++;
+    delay(10);
+  }
 }
 
 void send_data()
 {  
   // Calculate average over the last power meassurements before sending
-  _sum = 0;
-  _pulsecount = pulseCount;
-  
-  for(int i=1; i<=_pulsecount; i++) {
-    _sum += power[i];
-  }
+  int _pulsecount = pulseCount;      // Helper for calcualting average. Not using pulseCount because of interupt update
+  long _sum = 0;                     // Helper for calculating average
 
   if (_pulsecount > 0) {
-    txpower = int(_sum / _pulsecount);
-    txpulse = _pulsecount;
-    
+
+    for(int i=1; i<=_pulsecount; i++) {
+      _sum += power[i];
+    }
     pulseCount=0;
     power[50] = { };
 
-    client.publishData(&txpower, &txpulse);
+    long txpower = _sum / _pulsecount;
+
+    client.publishData(&txpower, &_pulsecount);
 
 #ifdef DEBUG
     Serial.print("W: ");
@@ -122,12 +122,8 @@ void send_data()
 // The interrupt routine - runs each time a falling edge of a pulse is detected
 void onPulse()                  
 {
-  elapsedTime = millis() - previousTime;
-
-  if (elapsedTime >= minElapsed)  //in range
+  if ((micros() - lastTime) >= minElapsed)  //in range
   {
-    previousTime = millis();
-    
     lastTime = pulseTime;        //used to measure time between pulses.
     pulseTime = micros();
 
