@@ -33,7 +33,7 @@ WiFiWrapper wifi;
 // Pulse counting settings 
 volatile int pulseCount = 0;       // Number of pulses, used to measure energy.
 volatile int power[50] = { };      // Array to store pulse power values
-unsigned long pulseTime,lastTime;  // Used to measure power.
+unsigned long pulseTime = 0;       // Used to measure time between pulses.
 int loopCount = 0;                 // Count iterations on mainloop
 
 void setup()
@@ -121,17 +121,17 @@ void send_data()
 // The interrupt routine - runs each time a falling edge of a pulse is detected
 void onPulse()                  
 {
-  if ((micros() - lastTime) >= MIN_ELAPSED_TIME)  //in range
-  {
-    lastTime = pulseTime;        //used to measure time between pulses.
-    pulseTime = micros();
+  unsigned long elapsedTime = micros() - pulseTime;
+  if (elapsedTime >= MIN_ELAPSED_TIME)  //in range
+  {      
+    pulseTime = micros();       //used to measure time between pulses.
 
     // Increase pulseCounter
     pulseCount++;
     
     // Size of array to avoid runtime error
     if (pulseCount < 50) {
-      power[pulseCount] = int((3600000000.0 / (pulseTime - lastTime)) / PPWH);  //Calculate power
+      power[pulseCount] = int((3600000000.0 / elapsedTime) / PPWH);  //Calculate power
       
 #ifdef DEBUG
       Serial.print("Power: ");
