@@ -34,7 +34,7 @@ WiFiWrapper wifi;
 volatile int pulseCount = 0;       // Number of pulses, used to measure energy.
 volatile int power[50] = { };      // Array to store pulse power values
 unsigned long pulseTime = 0;       // Used to measure time between pulses.
-int loopCount = 0;                 // Count iterations on mainloop
+unsigned long previousTime = 0;       // Main loop timing variable
 
 void setup()
 {  
@@ -71,22 +71,22 @@ void loop()
   // reset the watchdog timer
   ESP.wdtFeed();
 
-  if (loopCount > (REPORTING_INTERVAL_MS / 10)) 
+  unsigned long elapsedTime = millis() - previousTime;
+  if (elapsedTime >= REPORTING_INTERVAL_MS) 
   {
-    loopCount = 0;
+    previousTime = millis();
 
-    // check Wifi is still ok - Watchdog timer will catch this if not connected
-    while (!wifi.isConnected()) {
-      Serial.println("WiFi not connected!");
-      loopCount = loopCount + 50;
-      delay(500);
-    }
-
+    verifyWifiConnected();
     send_data();
+  }
+}
 
-  } else {
-    loopCount++;
-    delay(10);
+// If wifi not connected this will not return. Causes Watchdog timeout.
+void verifyWifiConnected() {
+  // check Wifi is still ok - Watchdog timer will catch this if not connected
+  while (!wifi.isConnected()) {
+    Serial.println("WiFi not connected!");
+    delay(500);
   }
 }
 
