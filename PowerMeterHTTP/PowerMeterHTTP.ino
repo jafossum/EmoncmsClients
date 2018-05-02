@@ -107,7 +107,9 @@ void send_data()
 
     long txpower = (_sum / _pulsecount);
 
-    client.publishData(&txpower, &_pulsecount);
+    if (txpower > 0 && txpower < 20000) {
+      client.publishData(&txpower, &_pulsecount);
+    }
 
 #ifdef DEBUG
     Serial.print("W: ");
