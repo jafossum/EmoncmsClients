@@ -17,7 +17,7 @@
 #define DEBUG
 #define REPORTING_INTERVAL_MS 10000     // Reporting interval (ms)
 #define MIN_ELAPSED_TIME 100000         // Filtering min elapsed time (microSec)
-#define PPWH 1                          // pulses per watt hour
+#define PPWH 2                          // pulses per watt hour
 
 // EmonCms Client
 EmonCms client;
