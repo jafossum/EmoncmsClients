@@ -9,7 +9,6 @@
 */
 
 #include "emoncms.h"
-#include "Secrets.h"
 
 // Comment this out for not printing data to the serialport after Setup()
 #define DEBUG
