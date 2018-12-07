@@ -13,7 +13,7 @@
 // Comment this out for not printing data to the serialport after Setup()
 #define DEBUG
 #define REPORTING_INTERVAL_MS 10000     // Reporting interval (ms)
-#define MIN_ELAPSED_TIME 100000         // Filtering min elapsed time (microSec)
+#define MIN_ELAPSED_TIME 50000          // Filtering min elapsed time (microSec)
 #define PPWH 2                          // pulses per watt hour
 
 // EmonCms Client
@@ -25,10 +25,12 @@ EmonCms client;
 // dig pin D1 for input signal 
 
 // Pulse counting settings 
-volatile int pulseCount = 0;       // Number of pulses, used to measure energy.
-volatile int power[50] = { };      // Array to store pulse power values
-unsigned long pulseTime = 0;       // Used to measure time between pulses.
-unsigned long previousTime = 0;       // Main loop timing variable
+const int countSize = 150;              // Size for arrays storing data
+volatile int pulseCount = 0;            // Number of pulses, used to measure energy.
+volatile int power[countSize] = { };    // Array to store pulse power values
+unsigned long pulseTime = 0;            // Used to measure time between pulses.
+unsigned long previousTime = 0;         // Main loop timing variable
+int maxPower = 25000;                   // Max power allowed to avoid spikes
 
 void setup() 
 {
@@ -94,11 +96,11 @@ void send_data()
       _sum += power[i];
     }
     pulseCount=0;
-    power[50] = { };
+    power[countSize] = { };
 
     long txpower = (_sum / _pulsecount);
 
-    if (txpower > 0 && txpower < 20000) {
+    if (txpower > 0 && txpower < maxPower) {
       client.publishData(&txpower, &_pulsecount);
     }
 
@@ -123,7 +125,7 @@ void onPulse()
     pulseCount++;
     
     // Size of array to avoid runtime error
-    if (pulseCount < 50) {
+    if (pulseCount < countSize) {
       power[pulseCount] = int((3600000000.0 / elapsedTime) / PPWH);  //Calculate power
   
 #ifdef DEBUG    
@@ -134,7 +136,9 @@ void onPulse()
 #endif
     }
     else {
-      Serial.println("Pulsecount over 50. Not logging....");
+      Serial.print("Pulsecount over ");
+      Serial.print(countSize);
+      Serial.println(". Not logging....");
     }
   }
 }
