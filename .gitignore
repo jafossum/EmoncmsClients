@@ -33,5 +33,9 @@
 
 # JAF Aditions
 Secrets.h
+target/
+
+# Particle speciality
+PowerMeterParticle.cpp
 
 .vscode
